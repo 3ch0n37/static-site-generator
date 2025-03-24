@@ -21,3 +21,18 @@ class HTMLNode:
             props: {self.props_to_html()}
         )
         """)
+
+class LeafNode(HTMLNode):
+    def __init__(self, tag, value, props = None):
+        super().__init__(tag, value, None, props)
+
+    def to_html(self):
+        if self.value is None:
+            raise ValueError("value is a mandatory property of LeafNode")
+        if self.tag is None or self.tag == "":
+            return self.value
+        props_html = self.props_to_html()
+        return f"<{self.tag}{props_html}>{self.value}</{self.tag}>"
+
+    def __repr__(self):
+        return f"LeafNode({self.tag}, {self.value}, {self.props})"

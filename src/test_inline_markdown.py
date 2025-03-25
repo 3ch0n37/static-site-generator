@@ -1,6 +1,6 @@
 import unittest
 from textnode import TextNode, TextType
-from inline_markdown import split_nodes_delimiter
+from inline_markdown import split_nodes_delimiter, extract_markdown_images, extract_markdown_links
 
 class TestInlineMarkdown(unittest.TestCase):
     def test_code_normal(self):
@@ -43,3 +43,18 @@ class TestInlineMarkdown(unittest.TestCase):
     def test_invalid_markdown(self):
         node = TextNode("This contains a `mistake.", TextType.TEXT)
         self.assertRaises(ValueError, split_nodes_delimiter, [node], "`", TextType.CODE)
+
+    def test_extract_markdown_images(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    def test_extract_markdown_links(self):
+        matches = extract_markdown_links(
+            "This is a text with a link [to google](https://www.google.com) and [DuckDuckGo](https://ddg.co)."
+        )
+        self.assertListEqual(matches, [
+            ("to google", "https://www.google.com"),
+            ("DuckDuckGo", "https://ddg.co")
+        ])

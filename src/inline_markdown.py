@@ -21,46 +21,6 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         new_nodes.extend(split_nodes)
     return new_nodes
 
-def split_nodes_image(old_nodes):
-    new_nodes = []
-    for old_node in old_nodes:
-        if old_node.text_type != TextType.TEXT:
-            new_nodes.append(old_node)
-            continue
-        split_nodes = []
-        images = extract_markdown_images(old_node.text)
-        node_text = old_node.text
-        for image in images:
-            [before, after] = node_text.split(f'![{image[0]}]({image[1]})', 1)
-            if len(before) > 0:
-                split_nodes.append(TextNode(before, TextType.TEXT))
-            split_nodes.append(TextNode(image[0], TextType.IMAGE, image[1]))
-            node_text = after
-        if len(node_text):
-            split_nodes.append(TextNode(node_text, TextType.TEXT))
-        new_nodes.extend(split_nodes)
-    return new_nodes
-
-def split_nodes_link(old_nodes):
-    new_nodes = []
-    for old_node in old_nodes:
-        if old_node.text_type != TextType.TEXT:
-            new_nodes.append(old_node)
-            continue
-        split_nodes = []
-        links = extract_markdown_links(old_node.text)
-        node_text = old_node.text
-        for link in links:
-            [before, after] = node_text.split(f'[{link[0]}]({link[1]})', 1)
-            if len(before) > 0:
-                split_nodes.append(TextNode(before, TextType.TEXT))
-            split_nodes.append(TextNode(link[0], TextType.LINK, link[1]))
-            node_text = after
-        if len(node_text):
-            split_nodes.append(TextNode(node_text, TextType.TEXT))
-        new_nodes.extend(split_nodes)
-    return new_nodes
-
 def extract_markdown_images(text):
     # pattern = r"!\[(.*)\]\((.*)\)"
     pattern = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
@@ -70,3 +30,35 @@ def extract_markdown_links(text):
     # pattern = r"\[(.*)\]\((.*)\)"
     pattern = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
     return re.findall(pattern, text)
+
+def split_nodes_link_image(old_nodes, is_image, text_type):
+    new_nodes = []
+    for old_node in old_nodes:
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
+        split_nodes = []
+        elements = []
+        node_text = old_node.text
+        if is_image:
+            elements = extract_markdown_images(node_text)
+        else:
+            elements = extract_markdown_links(node_text)
+        for element in elements:
+            [before, after] = node_text.split(f'{'!' if is_image else ''}[{element[0]}]({element[1]})', 1)
+            if len(before) > 0:
+                split_nodes.append(TextNode(before, TextType.TEXT))
+            split_nodes.append(TextNode(element[0], text_type, element[1]))
+            node_text = after
+        if len(node_text):
+            split_nodes.append(TextNode(node_text, TextType.TEXT))
+        new_nodes.extend(split_nodes)
+    return new_nodes
+
+def split_nodes_image(old_nodes):
+    return split_nodes_link_image(old_nodes, True, TextType.IMAGE)
+
+def split_nodes_link(old_nodes):
+    return split_nodes_link_image(old_nodes, False, TextType.LINK)
+
+

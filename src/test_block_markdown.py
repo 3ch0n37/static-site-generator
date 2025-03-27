@@ -1,5 +1,5 @@
 import unittest
-from block_markdown import markdown_to_blocks
+from block_markdown import markdown_to_blocks, block_to_block_type, BlockType
 
 class TestBlockMarkdown(unittest.TestCase):
     def test_markdown_to_blocks(self):
@@ -64,3 +64,49 @@ This is the same paragraph on a new line
         md = "**Bold Text**\n\n_Italic Text_\n\n`Code Block`"
         result = markdown_to_blocks(md)
         self.assertEqual(result, ["**Bold Text**", "_Italic Text_", "`Code Block`"])
+
+    def test_paragraph_block(self):
+        block = "This is a simple paragraph block."
+        result = block_to_block_type(block)
+        self.assertEqual(result, BlockType.PARAGRAPH)
+
+    def test_heading_block(self):
+        block = "# This is a single-line heading"
+        result = block_to_block_type(block)
+        self.assertEqual(result, BlockType.HEADING)
+
+    def test_code_block(self):
+        block = "```\nprint('Hello, world!')\n```"
+        result = block_to_block_type(block)
+        self.assertEqual(result, BlockType.CODE)
+
+    def test_unordered_list_block(self):
+        block = "- Item 1\n- Item 2\n- Item 3"
+        result = block_to_block_type(block)
+        self.assertEqual(result, BlockType.UNORDERED_LIST)
+
+    def test_ordered_list_block(self):
+        block = "1. Step one\n2. Step two\n3. Step three"
+        result = block_to_block_type(block)
+        self.assertEqual(result, BlockType.ORDERED_LIST)
+
+    def test_invalid_list_blocks(self):
+        unordered_block = "Item 1\n- Item 2"
+        ordered_block = "1. Step one\n2) Step two"
+        self.assertEqual(block_to_block_type(unordered_block), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type(ordered_block), BlockType.PARAGRAPH)
+
+    def test_empty_block(self):
+        block = ""
+        result = block_to_block_type(block)
+        self.assertEqual(result, BlockType.PARAGRAPH)
+
+    def test_block_with_special_characters(self):
+        block = "!@#$%^&*()"
+        result = block_to_block_type(block)
+        self.assertEqual(result, BlockType.PARAGRAPH)
+
+    def test_multiline_paragraph(self):
+        block = "This is a paragraph\nthat spans multiple lines."
+        result = block_to_block_type(block)
+        self.assertEqual(result, BlockType.PARAGRAPH)

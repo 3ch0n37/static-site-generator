@@ -37,7 +37,7 @@ def is_ordered_list(block):
 def is_quote(block):
     lines = block.split("\n")
     for line in lines:
-        if not line.startswith("> "):
+        if not line.startswith(">"):
             return False
     return True
 
@@ -147,7 +147,7 @@ def quote_to_html_node(block):
     for line in lines:
         if not line.startswith(">"):
             raise ValueError("invalid quote block")
-        new_lines.append(line.lstrip(">").strip())
-    content = " ".join(new_lines)
+        new_lines.append(line.lstrip("> ").strip())
+    content = "\n".join(new_lines)
     children = text_to_children(content)
     return ParentNode("blockquote", children)

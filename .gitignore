@@ -1,3 +1,4 @@
-.fleet
+.fleet/
 __pycache__/
-.idea
+.idea/
+public/
